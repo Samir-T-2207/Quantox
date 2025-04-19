@@ -1,28 +1,28 @@
-const express = require("express");
-const cors = require("cors");
+// Importiere Express
+const express = require('express');
 const app = express();
+const port = process.env.PORT || 3000;
 
-app.use(cors());
+// Middleware für JSON-Parsing, falls du JSON-Daten empfängst
 app.use(express.json());
 
-let messages = [];
-
-app.get("/messages", (req, res) => {
-  res.json(messages);
+// Eine einfache Route für die Basis-URL
+app.get('/', (req, res) => {
+  res.send('Hello, Messenger is running!');
 });
 
-app.post("/messages", (req, res) => {
-  const { sender, text } = req.body;
-  if (sender && text) {
-    const msg = { sender, text, timestamp: Date.now() };
-    messages.push(msg);
-    res.status(201).json(msg);
-  } else {
-    res.status(400).send("Missing fields");
-  }
+// Beispiel-API-Route (kann später mit echter Logik erweitert werden)
+app.get('/api/messages', (req, res) => {
+  res.json({ message: 'This is a sample message!' });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Health Check-Route für Render oder Monitoring-Tools
+app.get('/healthz', (req, res) => {
+  res.status(200).send('OK');
 });
+
+// Starte den Server
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
+
