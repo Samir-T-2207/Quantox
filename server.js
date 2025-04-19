@@ -1,7 +1,13 @@
 const express = require("express");
 const fs = require("fs");
 const cors = require("cors");
+const http = require("http");
+const WebSocket = require("ws");
+
 const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
@@ -50,12 +56,41 @@ app.post("/api/messages", (req, res) => {
     fs.writeFile(filePath, JSON.stringify(messages, null, 2), (err) => {
       if (err) return res.status(500).send("Fehler beim Speichern.");
       res.status(201).json(newMessage);
+
+      // Sende die neue Nachricht an alle verbundenen Clients
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(newMessage));
+        }
+      });
     });
   });
 });
 
-// Start
-app.listen(PORT, () => {
-  console.log(`Server läuft auf Port ${PORT}`);
+// WebSocket: Wenn ein Client verbunden ist, warte auf Nachrichten
+wss.on("connection", (ws) => {
+  console.log("Neuer WebSocket-Client verbunden");
+
+  // Sende die letzten Nachrichten an den neuen Client
+  fs.readFile(filePath, "utf8", (err, data) => {
+    if (!err) {
+      const messages = JSON.parse(data || "[]");
+      ws.send(JSON.stringify(messages));
+    }
+  });
+
+  // Wenn der Client eine Nachricht sendet, könnte man darauf reagieren
+  ws.on("message", (message) => {
+    console.log(`Nachricht vom Client: ${message}`);
+  });
+
+  // Wenn die Verbindung geschlossen wird
+  ws.on("close", () => {
+    console.log("WebSocket-Verbindung geschlossen");
+  });
 });
 
+// Starte den Server mit WebSocket
+server.listen(PORT, () => {
+  console.log(`Server läuft auf Port ${PORT}`);
+});
