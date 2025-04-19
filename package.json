@@ -1,14 +1,16 @@
 {
-  "name": "Quantox",
+  "name": "dein-projekt",
   "version": "1.0.0",
-  "description": "Ein einfacher Messenger Backend Server",
   "main": "server.js",
+  "dependencies": {
+    "ws": "^8.0.0",  // Hier sollte ws drin sein
+    "express": "^4.17.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {},
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.18.2"
-  }
+  "author": "",
+  "license": "ISC"
 }
-
